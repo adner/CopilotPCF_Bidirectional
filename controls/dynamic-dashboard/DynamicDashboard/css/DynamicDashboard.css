@@ -1,0 +1,208 @@
+.ddb-root {
+  --fg: #1c2431;
+  --muted: #6b7280;
+  --bg: #f5f7fa;
+  --panel: #ffffff;
+  --accent: #3b82f6;
+  --border: rgba(20, 30, 50, 0.12);
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  color: var(--fg);
+  background: var(--bg);
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 100%;
+  padding: 14px 16px 24px;
+  overflow: auto;
+}
+.ddb-root *,
+.ddb-root *::before,
+.ddb-root *::after {
+  box-sizing: border-box;
+}
+
+.ddb-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.ddb-h-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+.ddb-chip {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 11px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.ddb-spacer {
+  flex: 1;
+}
+.ddb-btn {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--fg);
+  border-radius: 8px;
+  padding: 7px 13px;
+  transition: 0.15s;
+}
+.ddb-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.ddb-btn--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.ddb-btn--primary:hover {
+  filter: brightness(1.05);
+  color: #fff;
+}
+
+.ddb-status {
+  min-height: 24px;
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: 0.1px;
+  color: var(--muted);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.ddb-status--ok {
+  color: #0f9d58;
+}
+.ddb-status--err {
+  color: #d9483b;
+}
+.ddb-status--busy {
+  color: var(--accent);
+}
+/* Spinner for the in-progress states (busy + the "Generating…" ok message). A ::before pseudo-
+   element so it rides along with textContent updates and inherits the status color via currentColor. */
+.ddb-status--busy::before,
+.ddb-status--ok::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: ddb-spin 0.6s linear infinite;
+}
+@keyframes ddb-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ddb-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  gap: 16px;
+}
+
+.ddb-tile {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 340px;
+  box-shadow: 0 1px 3px rgba(20, 30, 50, 0.06);
+}
+.ddb-tile--new {
+  animation: ddb-pulse 2.2s ease-out;
+}
+@keyframes ddb-pulse {
+  0% {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.55);
+  }
+  100% {
+    box-shadow: 0 1px 3px rgba(20, 30, 50, 0.06);
+  }
+}
+.ddb-tile-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.ddb-tile-title {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 650;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ddb-icon {
+  font: inherit;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  border-radius: 6px;
+  width: 26px;
+  height: 26px;
+  transition: 0.15s;
+}
+.ddb-icon:hover {
+  color: var(--fg);
+  border-color: var(--border);
+}
+.ddb-frame {
+  flex: 1;
+  width: 100%;
+  border: 0;
+  display: block;
+}
+
+.ddb-empty {
+  display: flex;
+  justify-content: center;
+  padding: 40px 0;
+}
+/* The author `display:flex` above outranks the UA `[hidden]{display:none}` rule,
+   so re-assert none when hidden (higher specificity) or the card never hides. */
+.ddb-empty[hidden] {
+  display: none;
+}
+.ddb-empty-card {
+  max-width: 420px;
+  text-align: center;
+  padding: 26px 28px;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+}
+.ddb-empty-h {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.ddb-empty-p {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}

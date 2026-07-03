@@ -1,0 +1,146 @@
+{
+    "tools": [
+        {
+            "name": "add_to_dashboard",
+            "title": "Add to dashboard",
+            "description": "Publish a previously created visualization onto the dashboard and return its tile URL.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "vizId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "The vizId returned by create_visualization."
+                    }
+                },
+                "required": [
+                    "vizId"
+                ],
+                "additionalProperties": false,
+                "$schema": "http://json-schema.org/draft-07/schema#"
+            },
+            "execution": {
+                "taskSupport": "forbidden"
+            }
+        },
+        {
+            "name": "create_visualization",
+            "title": "Create visualization",
+            "description": "Create a data visualization (bar/line/pie/kpi) from a natural-language request over the Dataverse data (e.g. 'the value of the 5 most recently created opportunities in a bar chart'). Renders an interactive chart in the pane with an 'Add to dashboard' button.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "description": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Natural-language description of the visualization to create."
+                    }
+                },
+                "required": [
+                    "description"
+                ],
+                "additionalProperties": false,
+                "$schema": "http://json-schema.org/draft-07/schema#"
+            },
+            "execution": {
+                "taskSupport": "forbidden"
+            },
+            "_meta": {
+                "ui": {
+                    "resourceUri": "ui://ddb/viewer.html"
+                },
+                "ui/resourceUri": "ui://ddb/viewer.html"
+            }
+        },
+        {
+            "name": "update_visualization",
+            "title": "Update visualization",
+            "description": "Update an EXISTING visualization in place from a natural-language change (e.g. 'make the bars different colors', 'show 10 records instead of 5', 'switch to a line chart'). Pass the vizId of the chart to change plus the requested change — this edits that chart rather than creating a new one, and re-renders it in the pane.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "vizId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "The vizId of the visualization to update (from list_dashboard or create_visualization)."
+                    },
+                    "changeRequest": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Natural-language change to apply, e.g. 'make the bars different colors' or 'show 10 records instead of 5'."
+                    }
+                },
+                "required": [
+                    "vizId",
+                    "changeRequest"
+                ],
+                "additionalProperties": false,
+                "$schema": "http://json-schema.org/draft-07/schema#"
+            },
+            "execution": {
+                "taskSupport": "forbidden"
+            },
+            "_meta": {
+                "ui": {
+                    "resourceUri": "ui://ddb/viewer.html"
+                },
+                "ui/resourceUri": "ui://ddb/viewer.html"
+            }
+        },
+        {
+            "name": "list_dashboard",
+            "title": "List dashboard",
+            "description": "List the visualizations currently on the dashboard.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "$schema": "http://json-schema.org/draft-07/schema#"
+            },
+            "execution": {
+                "taskSupport": "forbidden"
+            }
+        },
+        {
+            "name": "reveal_easter_egg",
+            "title": "Easter egg",
+            "description": "Reveals the hidden easter egg visualization. Call this ONLY when the user explicitly asks to trigger, reveal, or see 'the easter egg' — it is a hidden surprise, not a real data query. Never use it for ordinary Dataverse requests.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {},
+                "$schema": "http://json-schema.org/draft-07/schema#"
+            },
+            "execution": {
+                "taskSupport": "forbidden"
+            },
+            "_meta": {
+                "ui": {
+                    "resourceUri": "ui://ddb/viewer.html"
+                },
+                "ui/resourceUri": "ui://ddb/viewer.html"
+            }
+        },
+        {
+            "name": "remove_from_dashboard",
+            "title": "Remove from dashboard",
+            "description": "Remove a visualization from the dashboard by vizId.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "vizId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "The vizId to remove."
+                    }
+                },
+                "required": [
+                    "vizId"
+                ],
+                "additionalProperties": false,
+                "$schema": "http://json-schema.org/draft-07/schema#"
+            },
+            "execution": {
+                "taskSupport": "forbidden"
+            }
+        }
+    ]
+}

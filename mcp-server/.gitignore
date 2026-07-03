@@ -1,0 +1,7 @@
+node_modules/
+dist/
+logs/
+state.json
+.env
+certs/
+*.log

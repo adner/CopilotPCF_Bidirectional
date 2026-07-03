@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<manifest>
+  <control namespace="DDB" constructor="DynamicDashboard" version="0.0.6"
+           display-name-key="Dynamic Dashboard" description-key="Live tiles published from M365 Copilot onto a Power Apps dashboard."
+           control-type="standard">
+    <!-- Premium: this control calls an external HTTPS service (the MCP/web server).
+         Replace the placeholder domain with your real server host (e.g. your devtunnel URL).
+         A domain change = edit here + version bump + pac pcf push. -->
+    <external-service-usage enabled="true">
+      <domain>https://your-server-host.example.com</domain>
+    </external-service-usage>
+
+    <!-- Input properties (configured on the control at design time). -->
+    <property name="serverBaseUrl" display-name-key="Server Base URL"
+              description-key="MCP/web server base URL, e.g. https://xxxx-3101.euw.devtunnels.ms"
+              of-type="SingleLine.Text" usage="input" required="true" />
+    <property name="dashboardKey" display-name-key="Dashboard Key"
+              description-key="Registry capability token (k for /dashboard and DELETE /tiles)."
+              of-type="SingleLine.Text" usage="input" required="true" />
+    <property name="agentId" display-name-key="Agent Id (gptId)"
+              description-key="gptId of the M365 Copilot declarative agent to seed New report prompts into."
+              of-type="SingleLine.Text" usage="input" required="false" />
+    <property name="seedPrompt" display-name-key="Seed Prompt"
+              description-key="Starter prompt placed (unsubmitted) into the Copilot input by New report."
+              of-type="SingleLine.Text" usage="input" required="false" />
+    <property name="autoRefreshSeconds" display-name-key="Auto-refresh Seconds"
+              description-key="Poll /dashboard every N seconds. 0 or blank = off (nudge + manual Refresh only)."
+              of-type="Whole.None" usage="input" required="false" />
+
+    <!-- Dataset anchor: only there to host a full-page grid. Records are ignored. -->
+    <data-set name="dashboardGrid" display-name-key="Dashboard Anchor"
+              description-key="Dataset anchor used to host the control full-page. Records are ignored." />
+
+    <resources>
+      <code path="index.ts" order="1" />
+      <css path="css/DynamicDashboard.css" order="1" />
+    </resources>
+
+    <feature-usage>
+      <uses-feature name="Utility" required="true" />
+    </feature-usage>
+  </control>
+</manifest>

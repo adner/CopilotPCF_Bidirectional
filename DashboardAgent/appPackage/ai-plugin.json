@@ -1,0 +1,56 @@
+{
+    "$schema": "https://developer.microsoft.com/json-schemas/copilot/plugin/v2.4/schema.json",
+    "schema_version": "v2.4",
+    "name_for_human": "Dashboard Agent",
+    "description_for_human": "Dashboard Agent",
+    "contact_email": "publisher-email@example.com",
+    "namespace": "dashboardagent",
+    "functions": [
+        {
+            "name": "add_to_dashboard",
+            "description": "Publish a previously created visualization onto the dashboard and return its tile URL."
+        },
+        {
+            "name": "create_visualization",
+            "description": "Create a data visualization (bar/line/pie/kpi) from a natural-language request over the Dataverse data (e.g. 'the value of the 5 most recently created opportunities in a bar chart'). Renders an interactive chart in the pane with an 'Add to dashboard' button."
+        },
+        {
+            "name": "update_visualization",
+            "description": "Update an existing visualization in place from a natural-language change (e.g. 'make the bars different colors', 'show 10 records instead of 5'). Pass the vizId of the chart to change plus the requested change; edits that chart rather than creating a new one."
+        },
+        {
+            "name": "list_dashboard",
+            "description": "List the visualizations currently on the dashboard."
+        },
+        {
+            "name": "remove_from_dashboard",
+            "description": "Remove a visualization from the dashboard by vizId."
+        },
+        {
+            "name": "reveal_easter_egg",
+            "description": "Reveals the hidden easter egg visualization. Call this ONLY when the user explicitly asks to trigger, reveal, or see 'the easter egg'."
+        }
+    ],
+    "runtimes": [
+        {
+            "type": "RemoteMCPServer",
+            "spec": {
+                "url": "https://your-server-host.example.com/mcp",
+                "mcp_tool_description": {
+                    "file": "mcp-tools.json"
+                }
+            },
+            "run_for_functions": [
+                "add_to_dashboard",
+                "create_visualization",
+                "update_visualization",
+                "list_dashboard",
+                "remove_from_dashboard",
+                "reveal_easter_egg"
+            ],
+            "auth": {
+                "type": "None"
+            }
+        }
+    ]
+}

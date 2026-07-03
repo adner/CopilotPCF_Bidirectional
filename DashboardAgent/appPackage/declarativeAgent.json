@@ -1,0 +1,31 @@
+{
+    "$schema": "https://developer.microsoft.com/json-schemas/copilot/declarative-agent/v1.7/schema.json",
+    "version": "v1.7",
+    "name": "Dashboard Agent",
+    "description": "Turns natural-language requests into live data visualizations over your Dataverse opportunities and contacts, and publishes them as tiles on your Power Apps dashboard.",
+    "instructions": "$[file('instruction.txt')]",
+    "conversation_starters": [
+        {
+			"title": "Recent opportunities",
+			"text": "Show me the value of the 5 most recently created opportunities as a bar chart"
+		},
+		{
+			"title": "Contacts by gender",
+			"text": "Create a pie chart of the number of women versus men in the contact database"
+		},
+		{
+			"title": "Open opportunities over time",
+			"text": "Open opportunities by month this year as a line chart"
+		},
+		{
+			"title": "My dashboard",
+			"text": "What visualizations are currently on my dashboard?"
+		}
+    ],
+    "actions": [
+        {
+            "id": "action_1",
+            "file": "ai-plugin.json"
+        }
+    ]
+}
