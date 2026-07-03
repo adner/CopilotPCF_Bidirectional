@@ -1,30 +1,26 @@
-# Dynamic Dashboard — chat a dashboard into existence with M365 Copilot
+# Dynamic Dashboard
 
-A demo where a user **chats data visualizations into existence in M365 Copilot** and publishes
-them as **live tiles on a Power Apps dashboard** — without ever leaving the conversation.
+Chat a chart into existence in M365 Copilot, then pin it to a Power Apps dashboard.
 
 > *"Show me a bar chart of open opportunities by month."*
-> *"Actually, make it a pie chart instead."*
-> *"Nice — add it to my dashboard."*
+> *"Make it a pie chart instead."*
+> *"Nice, add it to my dashboard."*
 
-Each request goes to a **declarative agent** backed by a custom **MCP server**. The server turns
-natural language into a Dataverse SQL query plus a vanilla-JS chart (one LLM call, structured
-output), renders it as an **MCP Apps widget** in the Copilot pane, and — when the user clicks
-**Add to dashboard** — serves the same visualization as a self-refreshing HTML tile that a **PCF
-control** in a model-driven Power App picks up within a second. One generated artifact, rendered
-two ways.
+You describe what you want in the Copilot pane. A [declarative agent](DashboardAgent/) hands the
+request to a custom [MCP server](mcp-server/), which uses an LLM to turn it into a SQL query and a
+small chart, then renders that chart right there in the chat. Click **Add to dashboard** and the
+same chart shows up as a live tile in a model-driven app a second later. One thing generated, shown
+in two places.
 
-## The demo, in six beats
+## How the demo goes
 
-1. **Empty dashboard** — a full-page PCF control in the model-driven app: "No reports yet."
-2. **Ask** — click **Generate new report ✨**; the Copilot pane opens and submits a starter prompt.
-3. **Generate & iterate** — the agent calls the server; a chart widget renders in the pane.
-   Iterate conversationally — each turn refines the same visualization.
-4. **Publish** — click the widget's **Add to dashboard** button. The tile animates onto the
-   dashboard *behind the pane* (a `postMessage` nudge tells the PCF to re-fetch).
-5. **It's alive** — edit a record in the app, hit ↻ on the tile: the number moves. Tiles are
-   served UI with a real data path, not screenshots.
-6. **Manage** — remove tiles with ✕, or ask the agent *"what's on my dashboard?"*.
+1. Open the app. The dashboard is empty — "No reports yet."
+2. Click **Generate new report ✨**. The Copilot pane opens with a starter prompt.
+3. The agent builds a chart and shows it in the pane. Keep talking to refine it.
+4. Click **Add to dashboard**. The tile slides onto the dashboard behind the pane.
+5. Change a record, hit ↻ on the tile — the numbers update. These are real, data-backed tiles, not
+   screenshots.
+6. Remove tiles with ✕, or just ask the agent what's on your dashboard.
 
 ## Architecture
 
@@ -51,93 +47,106 @@ two ways.
    └───────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-Key design points:
+A few decisions worth calling out:
 
-- **Generate once, wrap twice** — the LLM emits only a vanilla `function render(container, rows)`
-  chart core; the server wraps it either with inlined rows (the pane widget) or with a data-fetch
-  loop (the served tile). Same chart, two hosts.
-- **Vanilla-only rendering, enforced** — no CDNs, no chart libraries, no `fetch`/`eval` inside
-  generated code, so the output is immune to host CSP variance. A sanitizer rejects violations,
-  and SQL is validated *by executing it* (read-only) with a 2-attempt LLM repair loop.
-- **Capability URLs** — every exposed endpoint is gated by an unguessable token. Demo-grade auth
-  by explicit decision: no login, HTTPS only, not production.
-- **The nudge** — publishing fans out a `powerapps.copilot.chat.action` postMessage that the PCF
-  treats purely as a "re-fetch now" trigger; the server registry stays the single source of truth.
+- **Generate once, show twice.** The LLM only writes a plain `function render(container, rows)`.
+  The server wraps that same core two ways: with the data baked in (the chat widget), or with a
+  refresh loop (the dashboard tile).
+- **Plain JS charts, nothing fetched at runtime.** No CDNs or chart libraries in the generated
+  code, so it survives whatever content-security policy the host enforces. A sanitizer rejects
+  anything that breaks the rule, and the SQL is checked by actually running it (read-only), with a
+  couple of automatic repair attempts if it fails.
+- **Capability URLs.** Every endpoint is gated by an unguessable token. This is demo-grade auth on
+  purpose — no login, HTTPS only, not production.
+- **The nudge.** Publishing sends a `postMessage` that just tells the dashboard to re-fetch; the
+  server's registry is always the source of truth.
 
-## Repo layout
+The client-side seam — how the PCF, the Copilot pane, and the widget actually talk to each other —
+is written up in detail in
+**[references/power-apps-copilot-integration.md](references/power-apps-copilot-integration.md)**.
+Read that before touching the PCF or the widget bridge; it captures the Xrm.Copilot APIs, the
+postMessage contract, and the pitfalls that cost real time.
+
+## What's in here
 
 | Path | What it is |
 |---|---|
-| [`mcp-server/`](mcp-server/) | The server: MCP tools + web plane, NL→viz pipeline, Dataverse access, security. See its [README](mcp-server/README.md) for setup. |
-| [`DashboardAgent/`](DashboardAgent/) | The M365 Copilot declarative agent (Microsoft 365 Agents Toolkit project) that fronts the MCP server. |
-| [`controls/dynamic-dashboard/`](controls/dynamic-dashboard/) | The `DDB.DynamicDashboard` PCF control — the dashboard surface inside the Power App. |
-| [`spec.md`](spec.md) | The authoritative server design (code comments cite its sections). |
-| [`references/power-apps-copilot-integration.md`](references/power-apps-copilot-integration.md) | The client-side integration reference: Xrm.Copilot APIs, the widget→app bridge, PCF design, pitfalls. |
-| [`CLAUDE.md`](CLAUDE.md) | Working notes for AI coding agents (architecture map, commands, conventions). |
+| [`mcp-server/`](mcp-server/) | The server: MCP tools, web endpoints, the NL→chart pipeline, Dataverse access. Setup in its [README](mcp-server/README.md). |
+| [`DashboardAgent/`](DashboardAgent/) | The M365 Copilot declarative agent that fronts the server (Microsoft 365 Agents Toolkit project). |
+| [`controls/dynamic-dashboard/`](controls/dynamic-dashboard/) | The `DDB.DynamicDashboard` PCF control — the dashboard surface. |
+| [`spec.md`](spec.md) | The server design in full (code comments cite its sections). |
+| [`references/power-apps-copilot-integration.md`](references/power-apps-copilot-integration.md) | The client-side integration reference (start here for PCF/widget work). |
+| [`CLAUDE.md`](CLAUDE.md) | Working notes for AI coding agents. |
 
 ## Running it
 
-The repo ships with placeholders where your own values go — replace each before the
-corresponding component will work:
+The repo ships with placeholders where your own values go. Swap each one before the matching
+component will work:
 
 | Placeholder | Where | Replace with |
 |---|---|---|
-| `https://your-server-host.example.com` | `DashboardAgent/appPackage/ai-plugin.json`, `DashboardAgent/.vscode/mcp.json`, `controls/dynamic-dashboard/DynamicDashboard/ControlManifest.Input.xml` | your server's HTTPS base URL (e.g. a devtunnel host) — the same value as `PUBLIC_BASE_URL` in `mcp-server/.env` |
-| `https://yourorg.crm4.dynamics.com` | `mcp-server/.env` (from `.env.example`) | your Dataverse environment URL |
-| blank IDs in `DashboardAgent/env/.env.dev` | — | filled in automatically when you provision the agent |
-| `mcp-server/easteregg.jpg` | — | optional: swap the placeholder image for your own to personalize the `reveal_easter_egg` tool |
+| `https://your-server-host.example.com` | `DashboardAgent/appPackage/ai-plugin.json`, `DashboardAgent/.vscode/mcp.json`, the PCF's `ControlManifest.Input.xml` | your server's HTTPS base URL (same as `PUBLIC_BASE_URL` in `mcp-server/.env`) |
+| `https://yourorg.crm4.dynamics.com` | `mcp-server/.env` | your Dataverse environment URL |
+| blank IDs in `DashboardAgent/env/.env.dev` | — | filled in when you provision the agent |
+| `mcp-server/easteregg.jpg` | — | optional: swap in your own image for the `reveal_easter_egg` tool |
 
-### 1. The server (`mcp-server/`)
+### 1. The server
 
-Prereqs: Node 18+, an OpenAI API key, and an Entra ID app registration set up as a **Dataverse
-application user** with read access (the server queries Dataverse over the TDS/SQL endpoint).
+You'll need Node 18+, an OpenAI API key, and an Entra ID app registration set up as a Dataverse
+application user with read access (the server reads Dataverse over the TDS/SQL endpoint).
 
 ```bash
 cd mcp-server
 npm install
-cp .env.example .env          # fill in OpenAI + AAD credentials, org URL, DASHBOARD_KEY
-npm run probe dataverse       # verify credentials/connectivity (token + SELECT TOP 1)
-npm run probe generate "open opportunity value by month as a bar chart"   # full pipeline, writes dist/probe-*.html
+cp .env.example .env          # OpenAI + AAD credentials, org URL, DASHBOARD_KEY
+npm run probe dataverse       # check credentials and connectivity
+npm run probe generate "open opportunity value by month as a bar chart"   # full pipeline → dist/probe-*.html
 npm run build                 # bundle the widget viewer (required before serve)
-npm run serve                 # MCP on http://localhost:3101/mcp, health on /health
+npm run serve                 # MCP on http://localhost:3101/mcp
 ```
-
-`.vscode/mcp.json` points VS Code at the local server, so you can exercise the tools from any MCP
-client before wiring the agent.
 
 ### 2. HTTPS exposure
 
-The Copilot agent and the Power App both need to reach the server over **HTTPS** (tiles inside the
-HTTPS app are otherwise blocked as mixed content). Expose port 3101 through a tunnel (e.g.
-`devtunnel` with anonymous access) and set `PUBLIC_BASE_URL` in `.env` to the tunnel URL.
+Both the agent and the Power App reach the server over HTTPS — an `http://localhost` URL gets
+blocked as mixed content inside the app. Expose port 3101 through a tunnel (e.g. `devtunnel`) and
+point `PUBLIC_BASE_URL` at the tunnel URL.
 
-### 3. The agent (`DashboardAgent/`)
+### 3. The agent
 
-An Agents Toolkit project: open it in VS Code with the Microsoft 365 Agents Toolkit extension and
-provision it to your tenant. `appPackage/ai-plugin.json` must point at your server's `/mcp` URL
-(replace the placeholder). After provisioning, note the agent's ID (`gptId`) — the PCF needs it.
-It is an opaque id of the form `T_<guid>` (the `M365_TITLE_ID` written to `env/.env.dev`); to
-confirm the live value, open the agent in the Copilot pane inside the Power App and run
-`Xrm.Copilot.getCurrentAgent()` in the browser DevTools console.
+Open `DashboardAgent/` in VS Code with the Microsoft 365 Agents Toolkit extension and provision it
+to your tenant. Point `appPackage/ai-plugin.json` at your server's `/mcp` URL first. After
+provisioning, grab the agent's `gptId` — the PCF needs it. It's an opaque id like `T_<guid>` (the
+`M365_TITLE_ID` in `env/.env.dev`); confirm the live value by opening the agent in the pane and
+running `Xrm.Copilot.getCurrentAgent()` in DevTools.
 
-### 4. The PCF control (`controls/dynamic-dashboard/`)
+### 4. The PCF control
 
 ```bash
 cd controls/dynamic-dashboard
 npm install
-npm start watch               # local harness on http://localhost:8181 (tile plane works; Copilot APIs don't — expected)
-pac pcf push --publisher-prefix ddb   # deploy to your environment
+npm start watch               # local harness on :8181 (tiles work; Copilot APIs don't — expected)
+pac pcf push --publisher-prefix ddb
 ```
 
-Then, in the maker portal: bind the control as the default grid control of an empty hosting table,
-add a **Dashboard** sitemap page for it in a model-driven app, and set the control properties —
-`serverBaseUrl` (the HTTPS tunnel), `dashboardKey` (= the server's `DASHBOARD_KEY`), `agentId`
-(the gptId from step 3). The manifest's `external-service-usage` domain must match the server
-host; changing it requires a version bump + re-push.
+Then in the maker portal: bind the control as the default grid control of an empty hosting table,
+add a **Dashboard** sitemap page in a model-driven app, and set `serverBaseUrl` (the tunnel),
+`dashboardKey` (= the server's `DASHBOARD_KEY`), and `agentId` (the gptId from step 3). The
+manifest's `external-service-usage` domain has to match the server host — changing it means a
+version bump and a re-push.
 
-## Security disclaimer
+## Credit
 
-This is a **stage demo**, deliberately single-user with no identity model: dashboard composition
-lives in a server-side singleton registry, and endpoints are protected only by capability tokens
-over HTTPS. Anyone with a tile URL can read that tile. A production version would put the server
-behind Entra ID (MSAL in the tiles, or an app proxy / API management layer in front).
+The PCF ↔ Copilot bridge here follows the pattern Matt Hidinger worked out in his
+[Power Apps time-tracker Copilot sample](https://github.com/matthidinger/powerapps-timetracker-copilot-sample),
+which is what got this demo off the ground. Thanks, Matt.
+
+## Security
+
+This is a stage demo, single-user by design with no identity model. Dashboard state lives in one
+server-side registry, and endpoints are protected only by capability tokens over HTTPS — anyone
+with a tile URL can read that tile. A real version would sit behind Entra ID (MSAL in the tiles, or
+an app proxy / API management layer in front).
+
+## License
+
+[MIT](LICENSE) © Andreas Adner
