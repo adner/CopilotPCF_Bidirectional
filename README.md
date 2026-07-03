@@ -138,7 +138,7 @@ version bump and a re-push.
 
 The PCF ↔ Copilot bridge here follows the pattern Matt Hidinger worked out in his
 [Power Apps time-tracker Copilot sample](https://github.com/matthidinger/powerapps-timetracker-copilot-sample),
-which is what got this demo off the ground. Thanks, Matt.
+which he demonstrated at the keynote of the European Power Platform Conference 2026. Thanks, Matt.
 
 ## Security
 
