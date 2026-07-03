@@ -6,10 +6,10 @@ Chat a chart into existence in M365 Copilot, then pin it to a Power Apps dashboa
 > *"Make it a pie chart instead."*
 > *"Nice, add it to my dashboard."*
 
-You describe what you want in the Copilot pane. A [declarative agent](DashboardAgent/) hands the
-request to a custom [MCP server](mcp-server/), which uses an LLM to turn it into a SQL query and a
-small chart, then renders that chart right there in the chat. Click **Add to dashboard** and the
-same chart shows up as a live tile in a model-driven app a second later. One thing generated, shown
+You describe what you want in the Copilot pane. A [M365 Copilot declarative agent](DashboardAgent/) hands the
+request to a custom [MCP server](mcp-server/), which uses an LLM (OpenAI) to turn it into a SQL query and a
+visualization, then renders that chart in the chat as an MCP Apps component. Click **Add to dashboard** and the
+same chart shows up as a live tile in a PCF in model-driven app a second later. One thing generated, shown
 in two places.
 
 ## How the demo goes
